@@ -1,6 +1,6 @@
-package io.softwarestrategies.projectx.api.controller;
+package io.softwarestrategies.projectx.widget.controller;
 
-import io.softwarestrategies.projectx.api.data.Widget;
+import io.softwarestrategies.projectx.widget.data.Widget;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

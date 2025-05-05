@@ -8,7 +8,6 @@ import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import io.softwarestrategies.projectx.gateway.exception.RetryException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
@@ -31,15 +30,15 @@ import java.util.concurrent.TimeoutException;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class Resilience4jConfig {
+public class ResilienceConfig {
 
-    public final static String ROUTE_EXTERNAL_SERVICE = "external-service";
+    public final static String ROUTE_WIDGET_SERVICE = "widget-service";
 
     private long HTTP_INITIAL_INTERVAL = 1000;
     private int HTTP_MAX_ATTEMPTS = 5;
 
-    private static final Double RANDOMIZATION_FACTOR = 0.2;  // 20% jitter
-    private static final Double MULTIPLIER = 1.5;
+    public static final Double RANDOMIZATION_FACTOR = 0.2;  // 20% jitter
+    public static final Double MULTIPLIER = 1.5;
 
     private final MeterRegistry meterRegistry;
 
@@ -70,27 +69,8 @@ public class Resilience4jConfig {
                 })
                 .build();
 
-        RetryConfig gatewayJitterRetry = RetryConfig.custom()
-                .maxAttempts(HTTP_MAX_ATTEMPTS)
-                .intervalFunction(httpExponentialRandomBackoffIntervalFunction)
-                .retryExceptions(IOException.class, HttpServerErrorException.class, TimeoutException.class,
-                        RetryException.class, ResourceAccessException.class, ConnectException.class)
-                .retryOnException(throwable -> {
-                    if (throwable instanceof HttpClientErrorException ex) {
-                        if (ex.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS ||
-                                ex.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE ||
-                                ex.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT) {
-                            return true;
-                        }
-                        return false;
-                    }
-                    return throwable instanceof IOException || throwable instanceof TimeoutException;
-                })
-                .build();
-
         RetryRegistry registry = RetryRegistry.ofDefaults();
         registry.retry("httpClientJitterRetry", httpClientJitterRetry);
-        registry.retry("gatewayJitterRetry", gatewayJitterRetry);
 
         return registry;
     }
@@ -123,7 +103,7 @@ public class Resilience4jConfig {
             factory.configure(builder -> builder
                     .circuitBreakerConfig(defaultCircuitBreakerConfig)
                     .timeLimiterConfig(defaultTimeLimiterConfig)
-                    .build(), Resilience4jConfig.ROUTE_EXTERNAL_SERVICE);
+                    .build(), ROUTE_WIDGET_SERVICE);
         };
     }
 

@@ -1,7 +1,7 @@
 package io.softwarestrategies.projectx.gateway.controller;
 
-import io.softwarestrategies.projectx.gateway.config.Resilience4jConfig;
-import io.softwarestrategies.projectx.gateway.resilience.ExternalServiceFallback;
+import io.softwarestrategies.projectx.gateway.config.ResilienceConfig;
+import io.softwarestrategies.projectx.gateway.resilience.WidgetServiceFallback;
 import io.softwarestrategies.projectx.gateway.web.OriginatingRequestForGatewayFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,27 +26,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GatewayFallbackController {
 
-    private final ExternalServiceFallback externalServiceFallback;
+    private final WidgetServiceFallback widgetServiceFallback;
 
     @RequestMapping(
             path="/gateway-fallback/{routeName}",
             method = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH }
     )
-    public ResponseEntity<Object> localEndpoint(@PathVariable String routeName, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<Object> gatewayFallbackEndpoint(@PathVariable String routeName, HttpServletRequest httpServletRequest) {
 
-        // Build response map
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "degraded");
-        response.put("service", "telephony-service");
-        response.put("timestamp", new Date());
+        // Try to get the original request details from multiple sources, ThreadLocal first
+        Map<String, Object> requestInfo = OriginatingRequestForGatewayFilter.RequestStorage.getRequestInfo();
 
-        // Try to get the original request details from multiple sources
-        Map<String, Object> requestInfo = null;
-
-        // Try ThreadLocal first
-        requestInfo = OriginatingRequestForGatewayFilter.RequestStorage.getRequestInfo();
-
-        // Try RequestContextHolder if ThreadLocal failed
+        // If ThreadLocal failed, then try RequestContextHolder
         if (requestInfo == null) {
             try {
                 RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
@@ -58,6 +49,8 @@ public class GatewayFallbackController {
                 log.warn("Could not retrieve request info from RequestContextHolder: {}", e.getMessage());
             }
         }
+
+        Map<String, Object> response = new HashMap<>();
 
         // Add request details to response if available
         if (requestInfo != null) {
@@ -82,7 +75,7 @@ public class GatewayFallbackController {
         OriginatingRequestForGatewayFilter.RequestStorage.clear();
 
         ResponseEntity<Object> responseEntity = switch (routeName) {
-            case Resilience4jConfig.ROUTE_EXTERNAL_SERVICE -> externalServiceFallback.callThruGateway(requestMethod, requestPath, requestBody, requestHeaders, queryParams);
+            case ResilienceConfig.ROUTE_WIDGET_SERVICE -> widgetServiceFallback.callThruGateway(requestMethod, requestPath, requestBody, requestHeaders, queryParams);
             default -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Fallback for the following service route is not implemented: " + routeName);
         };
 

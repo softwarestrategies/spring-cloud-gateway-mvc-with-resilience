@@ -40,6 +40,6 @@
 
     <modules>
         <module>gateway-service</module>
-        <module>api-service</module>
+        <module>widget-service</module>
     </modules>
 </project>

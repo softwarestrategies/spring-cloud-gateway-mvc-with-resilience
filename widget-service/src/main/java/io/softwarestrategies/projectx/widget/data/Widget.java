@@ -1,4 +1,4 @@
-package io.softwarestrategies.projectx.api.data;
+package io.softwarestrategies.projectx.widget.data;
 
 import lombok.Data;
 

@@ -14,13 +14,13 @@ import java.util.function.BiFunction;
 
 @Service
 @Slf4j
-public class ExternalServiceFallback {
+public class WidgetServiceFallback {
 
     private final Map<String, BiFunction<RequestPath, MultiValueMap<String, String>, ResponseEntity<Object>>> gatewayFallbackHandlers;
 
     private static final String GATEWAY_PATHPATTERN_GET_WIDGET = "/api/v1/external/widgets/{id}";
 
-    public ExternalServiceFallback() {
+    public WidgetServiceFallback() {
         gatewayFallbackHandlers = new HashMap<>();
         gatewayFallbackHandlers.put(GATEWAY_PATHPATTERN_GET_WIDGET, (requestPath, requestParams) -> fallbackForGetWidget(requestParams));
     }

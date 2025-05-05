@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.softwarestrategies.projectx</groupId>
-    <artifactId>api-service</artifactId>
+    <artifactId>widget-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>external-service</name>
-    <description>external-service</description>
+    <name>widget-service</name>
+    <description>Handles Widget-related API Calls</description>
     <url/>
     <licenses>
         <license/>

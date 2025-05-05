@@ -1,4 +1,4 @@
-package io.softwarestrategies.projectx.api;
+package io.softwarestrategies.projectx.widget;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

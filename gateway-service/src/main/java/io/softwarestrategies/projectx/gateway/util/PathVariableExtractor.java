@@ -17,15 +17,11 @@ public class PathVariableExtractor {
      * @return a Map containing the path variables if it matches, or an empty map if it does not
      */
     public static Map<String, String> matchAndExtract(RequestPath requestPath, String pattern) {
-        // Create a PathPatternParser to parse the pattern
         PathPatternParser parser = new PathPatternParser();
         PathPattern pathPattern = parser.parse(pattern);
+        PathPattern.PathMatchInfo pathMatchInfo = pathPattern.matchAndExtract(requestPath.pathWithinApplication());
 
-        // Check if the request path matches the pattern
-        PathPattern.PathMatchInfo matchInfo = pathPattern.matchAndExtract(requestPath.pathWithinApplication());
-
-        // Return the extracted variables if it matches, or an empty map if it doesn't
-        return matchInfo != null ? matchInfo.getUriVariables() : Collections.emptyMap();
+        return pathMatchInfo != null ? pathMatchInfo.getUriVariables() : Collections.emptyMap();
     }
 
     /**
@@ -38,6 +34,7 @@ public class PathVariableExtractor {
     public static boolean isMatch(RequestPath requestPath, String pattern) {
         PathPatternParser parser = new PathPatternParser();
         PathPattern pathPattern = parser.parse(pattern);
+
         return pathPattern.matches(requestPath.pathWithinApplication());
     }
 }
